@@ -1,0 +1,36 @@
+{
+  "name": "@liqd-js/endpoint",
+  "description": "Mongo model class",
+  "version": "0.0.1",
+  "author": "radixxko",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "test": "mocha --require ts-node/register test/**/*.ts",
+    "coverage": "nyc npm run test",
+    "build": "rm -rf ./dist/* && tsc",
+    "version": "rm -rf ./dist/* && tsc && npm publish",
+    "tmp": "ts-node test/test-model"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/liqd-js/endpoint.git"
+  },
+  "keywords": [
+    "mongo",
+    "model",
+    "liqd-js",
+    "liqd"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5",
+    "reflect-metadata": "^0.2.2"
+  },
+  "dependencies": {
+  }
+}
