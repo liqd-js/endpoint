@@ -14,7 +14,8 @@
     "coverage": "nyc npm run test",
     "build": "rm -rf ./dist/* && tsc",
     "version": "rm -rf ./dist/* && tsc && npm publish",
-    "tmp": "ts-node test/test-model"
+    "tmp": "ts-node test/test-model",
+    "prepare": "ts-patch install && typia patch"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,11 @@
   ],
   "devDependencies": {
     "@types/node": "^20.14.2",
-    "typescript": "^5.4.5",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "ts-patch": "^3.2.0",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
+    "typia": "^6.1.0"
   }
 }

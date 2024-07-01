@@ -1,37 +1,59 @@
 import Meta from '../meta';
+import { RouteMetadata } from '../types/private';
+import { assert, validate } from 'typia';
 
-function decorateMethod( method: string, url: string )
+function decorateMethod( method: RouteMetadata['method'], path: string )
 {
-    return function( target: any, propertyName: string, descriptor: PropertyDescriptor )
+    return function( target: any, property: string, descriptor: PropertyDescriptor )
     {
-        Meta.push( 'routes', target.constructor, { method, url, propertyName });
+        const argMetas = Meta.getProperty<RouteMetadata['args']>( 'routeArguments', target, property );
+        const argTypes = Reflect.getMetadata( 'design:paramtypes', target, property );
 
+        /*argTypes.forEach((type: any, index: number) => 
+        {
+            
+                console.log(`Parameter[${index}]:`);
+                console.log(`  Name: ${type.name}`);
+                console.log(`  Prototype: ${type.prototype}`);
+                console.log(`  Length: ${type.length}`);
+                console.log(`  Full Type: ${type}`);
+
+                console.log( validate<{ [key: string]: typeof type.prototype }>({ 'param1':  2 }) );
+            
+        });
+
+        const argType = Reflect.getMetadata( 'design:type', argTypes[0].constructor );
+
+        console.log({ argMetas, argTypes, argType });*/
+
+        Meta.push<RouteMetadata>( 'routes', target.constructor, { method, path, fn: property, args: argMetas });
+
+        /*validate = typia.createValidate<IBbsArticle>();
+        
         const handler = descriptor.value;
 
         descriptor.value = function( ...args: any[] )
         {
-            const parameterTypes: any[] = Meta.getProperty( 'parameterTypes', target, propertyName ) || [];
+            console.log({ args, argMetas, argTypes });
 
-            for( const param of parameterTypes )
+            for( let i = 0; i < argMetas.length; i++ )
             {
-                console.log( param );
+                let x = validate<{foo: 'string'}>( args[0] );
 
-                const paramValue = args[param.index];
-                if (typeof paramValue !== 'string') {
-                throw new Error(`Invalid type for parameter ${param.name}. Expected string, got ${typeof paramValue}`);
-                }
+                console.log( x, args[0] );
             }
 
-            console.log(`${method} request to URL: ${url}`);
             return handler.apply( this, args );
         };
 
-        return descriptor;
+        return descriptor;*/
     }
 }
 
-export function Get     ( url: string ){ return decorateMethod( 'GET'      , url )}
-export function Post    ( url: string ){ return decorateMethod( 'POST'     , url )}
-export function Put     ( url: string ){ return decorateMethod( 'PUT'      , url )}
-export function Patch   ( url: string ){ return decorateMethod( 'PATCH'    , url )}
-export function Delete  ( url: string ){ return decorateMethod( 'DELETE'   , url )}
+const methodDecorator = ( type: RouteMetadata['method'] ) => decorateMethod.bind( null, type );
+
+export const Get    = methodDecorator('GET');
+export const Post   = methodDecorator('POST');
+export const Put    = methodDecorator('PUT');
+export const Patch  = methodDecorator('PATCH');
+export const Delete = methodDecorator('DELETE');

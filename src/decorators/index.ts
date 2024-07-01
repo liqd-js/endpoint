@@ -1,16 +1,9 @@
-import Meta from '../meta';
-
 export * from './methods';
+export * from './arguments';
 
-export function Path( name: string )
-{
-    return function( target: Object, propertyKey: string | symbol, parameterIndex: number )
-    {
-        Meta.pushProperty( 'parameterTypes', target, propertyKey, { index: parameterIndex, name: name });
-    };
-}
+//Interceptors https://stackoverflow.com/questions/61697771/how-can-i-set-a-header-field-in-a-response-with-nestjs
 
-export function getRoutes(controller: any): { method: string, url: string, propertyName: string }[]
+export function SetHeader()
 {
-    return Meta.get( 'routes', controller ) ?? [];
+    
 }

@@ -1,0 +1,31 @@
+{
+    return function( target: any, property: string, descriptor: PropertyDescriptor )
+    {
+        Meta.push<RouteMetadata>( 'routes', target.constructor, { method, path, fn: property, args: Meta.getProperty( 'routeArguments', target, property )});
+
+        /*
+        const handler = descriptor.value;
+
+        descriptor.value = function( ...args: any[] )
+        {
+            console.log({ args, types: Meta.getProperty( 'routeArguments', target, property ) });
+
+            /*const parameterTypes: any[] = Meta.getProperty( 'parameterTypes', target, propertyName ) || [];
+
+            for( const param of parameterTypes )
+            {
+                console.log( param );
+
+                const paramValue = args[param.index];
+                if (typeof paramValue !== 'string') {
+                throw new Error(`Invalid type for parameter ${param.name}. Expected string, got ${typeof paramValue}`);
+                }
+            }* /
+
+            console.log(`${method} request to URL: ${path}`);
+            return handler.apply( this, args );
+        };
+
+        return descriptor;*/
+    }
+}
