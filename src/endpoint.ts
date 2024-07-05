@@ -50,7 +50,11 @@ export default class Endpoint
                         const controller = new Controller();
                         const result = await controller[fn]( ...( args ?? [] ).map( a => a.resolver( a, request, response )));
 
-                        if( result instanceof HTML )
+                        if( result === response )
+                        {
+                            return;
+                        }
+                        else if( result instanceof HTML )
                         {
                             response.setHeader( 'Content-Type', 'text/html' );
                             response.write( result.toString() );

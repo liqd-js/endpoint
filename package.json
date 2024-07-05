@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/endpoint",
-  "description": "Mongo model class",
-  "version": "0.0.3",
+  "description": "HTTPS Server Endpoint",
+  "version": "0.0.4",
   "author": "radixxko",
   "license": "MIT",
   "main": "dist/endpoint.js",
