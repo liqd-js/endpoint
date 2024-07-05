@@ -1,13 +1,13 @@
 import Meta from '../meta';
 import { RouteMetadata } from '../types/private';
-import { assert, validate } from 'typia';
+//import { assert, validate } from 'typia';
 
 function decorateMethod( method: RouteMetadata['method'], path: string )
 {
     return function( target: any, property: string, descriptor: PropertyDescriptor )
     {
         const argMetas = Meta.getProperty<RouteMetadata['args']>( 'routeArguments', target, property );
-        const argTypes = Reflect.getMetadata( 'design:paramtypes', target, property );
+        //const argTypes = Reflect.getMetadata( 'design:paramtypes', target, property );
 
         /*argTypes.forEach((type: any, index: number) => 
         {

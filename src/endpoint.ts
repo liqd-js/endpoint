@@ -1,20 +1,27 @@
 import { createServer, Server } from 'http';
 import Meta from './meta';
 
-import TestController from './controllers/test';
 import { RouteMetadata } from './types/private';
-import Router, { Request, Response } from './router';
+import { QueryParser } from './helpers/parsers';
+import Router, { EndpointRequest, EndpointResponse } from './router';
+import { HTML } from './helpers/todo';
 
+export * from './helpers/todo';
 export * from './decorators';
 
-export function getRoutes( controller: any ): RouteMetadata[]
+export { EndpointRequest, EndpointResponse };
+
+export class Controller
 {
-    return Meta.get( 'routes', controller ) ?? [];
-}
+    public constructor()
+    {
+
+    }
+};
 
 export type EndpointCreateOptions =
 {
-    controllers : any[],
+    controllers : Controller[],
     port        : number
 }
 
@@ -30,9 +37,7 @@ export default class Endpoint
 
     private constructor( options: EndpointCreateOptions )
     {
-        const controllers = options.controllers.map( Controller => ({ Controller, routes: getRoutes( Controller )}));
-
-        console.log( controllers );
+        const controllers = options.controllers.map( Controller => ({ Controller: Controller as any, routes: ( Meta.get( 'routes', Controller ) ?? []) as RouteMetadata[]}));
 
         for( const { Controller, routes } of controllers )
         {
@@ -40,26 +45,49 @@ export default class Endpoint
             {
                 this.router.listen([ method ], [ path ], [ async( request, response ) =>
                 {
-                    const controller = new Controller();
+                    try
+                    {
+                        const controller = new Controller();
+                        const result = await controller[fn]( ...( args ?? [] ).map( a => a.resolver( a, request, response )));
 
-                    const result = await controller[fn]( ...args.map( a => a.type === 'PATH' ? request.url : 'string' ) );
-
-                    response.write(result);
-                    response.end();
+                        if( result instanceof HTML )
+                        {
+                            response.setHeader( 'Content-Type', 'text/html' );
+                            response.write( result.toString() );
+                        }
+                        else if( typeof result !== 'string' )
+                        {
+                            response.setHeader( 'Content-Type', 'application/json' );
+                            response.write( JSON.stringify( result ));
+                        }
+                        else
+                        {
+                            response.setHeader( 'Content-Type', 'text/plain' );
+                            response.write( result );
+                        }
+                        
+                        response.end();
+                    }
+                    catch( e )
+                    {
+                        console.error( e );
+                        throw e;
+                    }
                 }]);
             }
         }
 
         this.server = createServer( async( request, response ) =>
         {
+            let query: any;
+            
             Object.assign( request, { path: request.url?.split('?')[0] });
             Object.assign( request, { params: {}});
+            Object.defineProperty( request, 'query', { get: () => query ?? ( query = QueryParser.parse( request.url?.split('?')[1] ?? '' )) });
 
-            this.router.dispatch( request as Request, response as Response );   
+            this.router.dispatch( request as EndpointRequest, response as EndpointResponse );   
         });
 
         this.server.listen( options.port );
     }
 }
-
-Endpoint.create({ controllers: [ TestController ], port: 8080 });

@@ -1,39 +1,36 @@
 {
   "name": "@liqd-js/endpoint",
   "description": "Mongo model class",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "author": "radixxko",
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/endpoint.js",
+  "types": "dist/endpoint.d.ts",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
     "coverage": "nyc npm run test",
-    "build": "rm -rf ./dist/* && tsc",
-    "version": "rm -rf ./dist/* && tsc && npm publish",
-    "tmp": "ts-node test/test-model",
-    "prepare": "ts-patch install && typia patch"
+    "build": "rm -rf ./dist/* && tsc --project tsconfig.build.json",
+    "version": "rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/liqd-js/endpoint.git"
   },
   "keywords": [
-    "mongo",
-    "model",
+    "server",
+    "endpoint",
     "liqd-js",
     "liqd"
   ],
-  "devDependencies": {
-    "@types/node": "^20.14.2",
-    "reflect-metadata": "^0.2.2",
-    "ts-patch": "^3.2.0",
-    "typescript": "^5.4.5"
-  },
   "dependencies": {
-    "typia": "^6.1.0"
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "ts-patch": "^3.2.1",
+    "typescript": "^5.4.5"
   }
 }

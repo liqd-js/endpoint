@@ -8,12 +8,12 @@ const PATH_DOT_RE = /\./g;
 const PATH_PARAM_WH_DEF_RE = /:([a-zA-Z_]+)\((([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(\))+\))+\))+\))+\))+\))+\))+\))+)\)/g; // ([^(]|\\((?R)\\))+
 const PATH_PARAM_WO_DEF_RE = /:([a-zA-Z_]+)/g;
 
-export type Request = IncomingMessage & { params: Object, path: string };
-export type Response = ServerResponse<IncomingMessage> & { req: Request };
+export type EndpointRequest = IncomingMessage & { url: string, path: string, params: Object, query: any, body: Object };
+export type EndpointResponse = ServerResponse<IncomingMessage> & { req: EndpointRequest };
 export type RouterMethod = 'HEAD' | 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 export type RouterPath = string | RegExp;
 export type RouterNext = ( route?: 'route' | 'error' ) => void;
-export type RouterHandler = ( req: Request, res: Response, next: RouterNext ) => void;
+export type RouterHandler = ( req: EndpointRequest, res: EndpointResponse, next: RouterNext ) => void;
 
 export default class Router
 {
@@ -40,12 +40,17 @@ export default class Router
         );
     }
 
+    public seo()
+    {
+        
+    }
+
     public listen( methods: RouterMethod[], paths: RouterPath[], handlers: RouterHandler[] )
     {
         this.routes.push({ methods, paths: paths.map( this.pathToRegExp ), handlers });
     }
 
-    private async route( request: Request, response: Response, routeNo: number = 0, handlerNo: number = 0, skipHandlers: boolean = false, error: any = undefined )
+    private async route( request: EndpointRequest, response: EndpointResponse, routeNo: number = 0, handlerNo: number = 0, skipHandlers: boolean = false, error: any = undefined )
     {
         let route = this.routes[ routeNo ];
 
@@ -133,7 +138,7 @@ export default class Router
         response.end( 'Not found' );
     }
 
-    public dispatch( req: Request, res: Response )
+    public dispatch( req: EndpointRequest, res: EndpointResponse )
     {
         this.route( req, res );
     }
