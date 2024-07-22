@@ -1,4 +1,4 @@
-import { Body, Get, Header, Param, Path, Post, Query, Headers, Controller, Url, Domain, Params, Request, Response, HTML } from '../../src/endpoint';
+import { Body, Get, Header, Param, Path, Post, Query, Headers, Url, Domain, Params, Request, Response, HTML, Cors } from '../../src/endpoint';
 import { EndpointRequest, EndpointResponse } from '../../src/router';
 
 type TypedQuery = { foo: string };
@@ -23,12 +23,15 @@ export default class TestController
         return `Hello world z Getu ${path} ${Date.now()}`;
     }*/
 
-    @Get( '/product' ) stranka(): HTML
+    @Get( '/product' )
+    @Cors( true )
+    stranka(): HTML
     {
         return new HTML(`<h1>PRD MAKOVY ${Date.now()}</h1><textarea></textarea>`);
     }
 
     @Get( '/product/list' )
+    @Cors( request => request.headers.origin === 'http://localhost:3000')
     list
     (
         @Url url: string,

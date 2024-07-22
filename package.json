@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/endpoint",
   "description": "HTTPS Server Endpoint",
-  "version": "0.0.4",
+  "version": "0.0.10",
   "author": "radixxko",
   "license": "MIT",
   "main": "dist/endpoint.js",
@@ -26,10 +26,11 @@
     "liqd"
   ],
   "dependencies": {
+    "@liqd-js/http-body-parser": "^1.0.2",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
+    "@types/node": "^20.14.11",
     "ts-patch": "^3.2.1",
     "typescript": "^5.4.5"
   }

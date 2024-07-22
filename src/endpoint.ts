@@ -5,25 +5,12 @@ import { RouteMetadata } from './types/private';
 import { QueryParser } from './helpers/parsers';
 import Router, { EndpointRequest, EndpointResponse } from './router';
 import { HTML } from './helpers/todo';
+import { EndpointCreateOptions } from './types/public';
 
 export * from './helpers/todo';
 export * from './decorators';
 
 export { EndpointRequest, EndpointResponse };
-
-export class Controller
-{
-    public constructor()
-    {
-
-    }
-};
-
-export type EndpointCreateOptions =
-{
-    controllers : Controller[],
-    port        : number
-}
 
 export default class Endpoint
 {
@@ -39,18 +26,29 @@ export default class Endpoint
     {
         const controllers = options.controllers.map( Controller => ({ Controller: Controller as any, routes: ( Meta.get( 'routes', Controller ) ?? []) as RouteMetadata[]}));
 
+        console.log( 'TUTAJ', options.controllers[0], Meta.get( 'cors', options.controllers[0] ));
+        //console.log( 'TUTAJ', Meta.get( 'cors', options.controllers[0].constructor.prototype['stranka'] ) );
+
         for( const { Controller, routes } of controllers )
         {
             for( const { method, path, fn, args } of routes )
             {
+                //console.log({ method, path, fn, meta: Meta.get( 'cors', Controller[method] ) });
+
                 this.router.listen([ method ], [ path ], [ async( request, response ) =>
                 {
+                    // TODO cors
+                    
                     try
                     {
                         const controller = new Controller();
-                        const result = await controller[fn]( ...( args ?? [] ).map( a => a.resolver( a, request, response )));
+                        const result = await controller[fn]( ...( await Promise.all(( args ?? [] ).map( a => a.resolver( a, request, response )))));
 
-                        if( result === response )
+                        if( !result )
+                        {
+
+                        }
+                        else if( result === response )
                         {
                             return;
                         }
@@ -89,7 +87,18 @@ export default class Endpoint
             Object.assign( request, { params: {}});
             Object.defineProperty( request, 'query', { get: () => query ?? ( query = QueryParser.parse( request.url?.split('?')[1] ?? '' )) });
 
-            this.router.dispatch( request as EndpointRequest, response as EndpointResponse );   
+            response.setHeader( 'Access-Control-Allow-Origin', '*' );
+            response.setHeader( 'Access-Control-Allow-Methods', '*' );
+            response.setHeader( 'Access-Control-Allow-Headers', '*' );
+
+            if( request.method === 'OPTIONS' )
+            {
+                response.end();
+            }
+            else
+            {
+                this.router.dispatch( request as EndpointRequest, response as EndpointResponse );
+            }
         });
 
         this.server.listen( options.port );

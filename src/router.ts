@@ -45,6 +45,11 @@ export default class Router
         
     }
 
+    public cors( methods: RouterMethod[], paths: RouterPath[] )
+    {
+        //this.routes.push({ methods, paths: paths.map( this.pathToRegExp )});
+    }
+
     public listen( methods: RouterMethod[], paths: RouterPath[], handlers: RouterHandler[] )
     {
         this.routes.push({ methods, paths: paths.map( this.pathToRegExp ), handlers });

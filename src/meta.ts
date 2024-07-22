@@ -1,5 +1,23 @@
 import 'reflect-metadata';
 
+export function objectSet( obj: Record<string, unknown>, path: string[], value: unknown )
+{
+    if( !path.length ){ throw new Error('Path is empty')}
+
+    if( path.length === 1 )
+    {
+        obj[ path[0] ] = value;
+    }
+    else
+    {
+        if( !obj[ path[0] ] || typeof obj[ path[0] ] === 'object' ){ obj[ path[0] ] = {}}
+
+        objectSet( obj[ path[0] ] as Record<string, unknown>, path.slice(1), value );
+    }
+
+    return obj;
+}
+
 export default class Meta
 {
     private static symbols = new Map<string,Symbol>();
@@ -43,6 +61,16 @@ export default class Meta
     public static setProperty<V,T extends Object=any>( key: string, target: T, property: string | symbol, value: V ): void
     {
         Reflect.defineMetadata( Meta.symbol( key ), value, target, property );
+    }
+
+    public static assign<V,T extends Object=any>( key: string, target: T, path: string, value: V ): void
+    {
+        Reflect.defineMetadata( Meta.symbol( key ), objectSet( Meta.get( key, target, {} ), path.split('.'), value ), target );
+    }
+
+    public static assignProperty<V,T extends Object=any>( key: string, target: T, property: string | symbol, path: string, value: V ): void
+    {
+        Reflect.defineMetadata( Meta.symbol( key ), objectSet( Meta.get( key, target, {} ), path.split('.'), value ), target, property );
     }
 
     public static push<V,T extends Object=any>( key: string, target: T, value: V ): void

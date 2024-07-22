@@ -2,6 +2,8 @@ import 'reflect-metadata';
 import Meta from '../meta';
 import { EndpointRequest, EndpointResponse } from '../router';
 import { RouteArgResolver, RouteArgType } from '../types/private';
+
+const HttpBodyParser = require('@liqd-js/http-body-parser');
 //import typia from 'typia';
 
 const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
@@ -17,7 +19,17 @@ const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
     //@ts-ignore
     PARAM       : ( arg, request ) => request.params[arg.name],
     QUERY       : ( arg, request ) => arg.name ? request.query[arg.name] : request.query,
-    BODY        : ( arg, request ) => {}
+    BODY        : ( arg, request ) => 
+    {
+        return new Promise( resolve =>
+        {
+            const body = new HttpBodyParser( request.headers['content-type'] );
+
+            request.pipe( body );
+
+            body.on( 'data', ( data: any ) => resolve( data ));
+        });
+    }
 }
 
 function decorateArgument( type: RouteArgType, name: string | undefined, target: Object, propertyKey: string | symbol, parameterIndex: number )
