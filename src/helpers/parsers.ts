@@ -119,3 +119,35 @@ export class QueryParser
         return data as T;
     }
 }
+
+export class CookieParser
+{
+    static parse<T>( cookiestring: string ): Record<string, string>
+    {
+        let cookies: Record<string, string> = {}, key, value, pair, last_pair = 0;
+
+        if( cookiestring )
+        {
+            do
+            {
+                pair = cookiestring.indexOf( del, last_pair ); if( pair === -1 ){ pair = cookiestring.length; }
+
+                if( pair - last_pair > 1 )
+                {
+                    if( ~( value = cookiestring.indexOf( eq, last_pair )) && value < pair )
+                    {
+                        key = decodeURIComponent( cookiestring.substring( last_pair, value ).trim() );
+                        value = decodeURIComponent( cookiestring.substring( value + 1, pair ).trim() );
+
+                        cookies[key] = value;
+                    }
+                }
+
+                last_pair = pair + 1;
+            }
+            while( last_pair < cookiestring.length );
+        }
+
+        return cookies;
+    }
+}

@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/endpoint",
   "description": "HTTPS Server Endpoint",
-  "version": "0.0.10",
+  "version": "0.0.16",
   "author": "radixxko",
   "license": "MIT",
   "main": "dist/endpoint.js",
@@ -12,8 +12,8 @@
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
     "coverage": "nyc npm run test",
-    "build": "rm -rf ./dist/* && tsc --project tsconfig.build.json",
-    "version": "rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public"
+    "build": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json",
+    "version": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public"
   },
   "repository": {
     "type": "git",
@@ -30,8 +30,8 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.11",
+    "@types/node": "^22.5.1",
     "ts-patch": "^3.2.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   }
 }

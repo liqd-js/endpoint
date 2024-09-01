@@ -29,6 +29,16 @@ const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
 
             body.on( 'data', ( data: any ) => resolve( data ));
         });
+    },
+    RAW_BODY        : ( arg, request ) =>  
+    {
+        return new Promise( resolve =>
+        {
+            const body: Buffer[] = [];
+
+            request.on( 'data', ( chunk: Buffer ) => body.push( chunk ));
+            request.on( 'end', () => resolve( Buffer.concat( body )));
+        });
     }
 }
 
@@ -51,6 +61,7 @@ export const Path       = argumentDecorator('PATH');
 export const Param      = namedArgumentDecorator('PARAM');
 export const Params     = argumentDecorator('PARAMS');
 export const Body       = argumentDecorator('BODY');
+export const RawBody    = argumentDecorator('RAW_BODY');
 //export const Query      = namedArgumentDecorator('QUERY');
 
 

@@ -1,12 +1,16 @@
-import { EndpointRequest } from '../router';
+import { EndpointRequest, EndpointResponse } from '../router';
 
-export class Controller
+export { EndpointRequest, EndpointResponse };
+
+export class Controller{};
+
+export class Middleware
 {
-    public constructor()
+    public use( request: EndpointRequest, response: EndpointResponse, next: () => void ): Promise<void> | void
     {
-
+        throw new Error('Method not implemented.');
     }
-};
+}
 
 export type CorsOptionsBase = true | false | ( string | RegExp )[] |
 {
@@ -22,6 +26,7 @@ export type CorsOptions = CorsOptionsBase | (( request: EndpointRequest ) => Cor
 export type EndpointCreateOptions =
 {
     controllers : Controller[],
+    middlewares?: Middleware[],
     cors?       : CorsOptions,
     port        : number
 }

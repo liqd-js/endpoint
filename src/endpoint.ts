@@ -2,15 +2,15 @@ import { createServer, Server } from 'http';
 import Meta from './meta';
 
 import { RouteMetadata } from './types/private';
-import { QueryParser } from './helpers/parsers';
+import { CookieParser, QueryParser } from './helpers/parsers';
 import Router, { EndpointRequest, EndpointResponse } from './router';
 import { HTML } from './helpers/todo';
-import { EndpointCreateOptions } from './types/public';
+import { EndpointCreateOptions, Middleware } from './types/public';
 
 export * from './helpers/todo';
 export * from './decorators';
 
-export { EndpointRequest, EndpointResponse };
+export * from './types/public';
 
 export default class Endpoint
 {
@@ -20,6 +20,20 @@ export default class Endpoint
     static create( options: EndpointCreateOptions )
     {
         return new Endpoint( options );
+    }
+
+    private handleMiddlewares( request: EndpointRequest, response: EndpointResponse, middlewares: Middleware[] = [] )
+    {
+        if( middlewares.length )
+        {
+            const [ middleware, ...rest ] = middlewares;
+
+            middleware.use( request, response, () => this.handleMiddlewares( request, response, rest ));
+        }
+        else
+        {
+            this.router.dispatch( request as EndpointRequest, response as EndpointResponse );
+        }
     }
 
     private constructor( options: EndpointCreateOptions )
@@ -81,11 +95,12 @@ export default class Endpoint
 
         this.server = createServer( async( request, response ) =>
         {
-            let query: any;
+            let query: any, cookies: Record<string, string>;
             
             Object.assign( request, { path: request.url?.split('?')[0] });
             Object.assign( request, { params: {}});
             Object.defineProperty( request, 'query', { get: () => query ?? ( query = QueryParser.parse( request.url?.split('?')[1] ?? '' )) });
+            Object.defineProperty( request, 'cookies', { get: () => cookies ?? ( cookies = CookieParser.parse( request.headers.cookie ?? '' )) });
 
             response.setHeader( 'Access-Control-Allow-Origin', '*' );
             response.setHeader( 'Access-Control-Allow-Methods', '*' );
@@ -97,7 +112,7 @@ export default class Endpoint
             }
             else
             {
-                this.router.dispatch( request as EndpointRequest, response as EndpointResponse );
+                this.handleMiddlewares( request as EndpointRequest, response as EndpointResponse, options.middlewares );
             }
         });
 
