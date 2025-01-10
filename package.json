@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/endpoint",
   "description": "HTTPS Server Endpoint",
-  "version": "0.0.17",
+  "version": "0.0.19",
   "author": "radixxko",
   "license": "MIT",
   "main": "dist/endpoint.js",

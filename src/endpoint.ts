@@ -102,10 +102,11 @@ export default class Endpoint
             Object.defineProperty( request, 'query', { get: () => query ?? ( query = QueryParser.parse( request.url?.split('?')[1] ?? '' )) });
             Object.defineProperty( request, 'cookies', { get: () => cookies ?? ( cookies = CookieParser.parse( request.headers.cookie ?? '' )) });
 
-            response.setHeader( 'Access-Control-Allow-Origin', request.headers.host?.replace( /:\d+$/, '' ) || '*' );
+            response.setHeader( 'Access-Control-Allow-Origin', request.headers.referer?.match( /^https?:\/\/[^/]+/ )?.[0] || '*' );
             response.setHeader( 'Access-Control-Allow-Methods', '*' );
-            response.setHeader( 'Access-Control-Allow-Headers', '*' );
-            request.headers.host?.replace( /:\d+$/, '' ) && response.setHeader( 'Access-Control-Allow-Credentials', 'true' );
+            //response.setHeader( 'Access-Control-Allow-Headers', '*' );
+            response.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With' );
+            request.headers.referer?.match( /^https?:\/\/[^/]+/ )?.[0] && response.setHeader( 'Access-Control-Allow-Credentials', 'true' );
 
             if( request.method === 'OPTIONS' )
             {
