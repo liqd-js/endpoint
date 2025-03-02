@@ -6,9 +6,11 @@ import { CookieParser, QueryParser } from './helpers/parsers';
 import Router, { EndpointRequest, EndpointResponse } from './router';
 import { HTML } from './helpers/todo';
 import { EndpointCreateOptions, Middleware } from './types/public';
+import { ServerError } from './errors';
 
 export * from './helpers/todo';
 export * from './decorators';
+export * from './errors';
 
 export * from './types/public';
 
@@ -22,26 +24,42 @@ export default class Endpoint
         return new Endpoint( options );
     }
 
-    private handleMiddlewares( request: EndpointRequest, response: EndpointResponse, middlewares: Middleware[] = [] )
+    private async handleRequest( request: EndpointRequest, response: EndpointResponse, middlewares: Middleware[] = [] )
     {
-        if( middlewares.length )
+        for( let i = 0; i < middlewares.length; ++i )
         {
-            const [ middleware, ...rest ] = middlewares;
+            const middleware = middlewares[i];
 
-            middleware.use( request, response, () => this.handleMiddlewares( request, response, rest ));
+            if( Object.getPrototypeOf( middleware ).hasOwnProperty('useCallback'))
+            {
+                return await new Promise<void>(( resolve, reject ) => middleware.useCallback( request, response, async( error ) =>
+                {
+                    if( error ){ return reject( error )}
+
+                    try
+                    {
+                        await this.handleRequest( request, response, middlewares.slice( i + 1 ));
+
+                        resolve();
+                    }
+                    catch( e: any )
+                    {
+                        reject( e );
+                    }
+                }));
+            }
+            else
+            {
+                await middleware.use( request, response );
+            }
         }
-        else
-        {
-            this.router.dispatch( request as EndpointRequest, response as EndpointResponse );
-        }
+        
+        await this.router.dispatch( request as EndpointRequest, response as EndpointResponse );
     }
 
     private constructor( options: EndpointCreateOptions )
     {
         const controllers = options.controllers.map( Controller => ({ Controller: Controller as any, routes: ( Meta.get( 'routes', Controller ) ?? []) as RouteMetadata[]}));
-
-        console.log( 'TUTAJ', options.controllers[0], Meta.get( 'cors', options.controllers[0] ));
-        //console.log( 'TUTAJ', Meta.get( 'cors', options.controllers[0].constructor.prototype['stranka'] ) );
 
         for( const { Controller, routes } of controllers )
         {
@@ -49,47 +67,37 @@ export default class Endpoint
             {
                 //console.log({ method, path, fn, meta: Meta.get( 'cors', Controller[method] ) });
 
-                this.router.listen([ method ], [ path ], [ async( request, response ) =>
+                this.router.listen( method, path, async( request, response ) =>
                 {
-                    // TODO cors
+                    const controller = new Controller();
+                    const result = await controller[fn]( ...( await Promise.all(( args ?? [] ).map( a => a.resolver( a, request, response )))));
+
+                    if( !result )
+                    {
+
+                    }
+                    else if( result === response )
+                    {
+                        return;
+                    }
+                    else if( result instanceof HTML )
+                    {
+                        response.setHeader( 'Content-Type', 'text/html' );
+                        response.write( result.toString() );
+                    }
+                    else if( typeof result !== 'string' )
+                    {
+                        response.setHeader( 'Content-Type', 'application/json' );
+                        response.write( JSON.stringify( result ));
+                    }
+                    else
+                    {
+                        response.setHeader( 'Content-Type', 'text/plain' );
+                        response.write( result );
+                    }
                     
-                    try
-                    {
-                        const controller = new Controller();
-                        const result = await controller[fn]( ...( await Promise.all(( args ?? [] ).map( a => a.resolver( a, request, response )))));
-
-                        if( !result )
-                        {
-
-                        }
-                        else if( result === response )
-                        {
-                            return;
-                        }
-                        else if( result instanceof HTML )
-                        {
-                            response.setHeader( 'Content-Type', 'text/html' );
-                            response.write( result.toString() );
-                        }
-                        else if( typeof result !== 'string' )
-                        {
-                            response.setHeader( 'Content-Type', 'application/json' );
-                            response.write( JSON.stringify( result ));
-                        }
-                        else
-                        {
-                            response.setHeader( 'Content-Type', 'text/plain' );
-                            response.write( result );
-                        }
-                        
-                        response.end();
-                    }
-                    catch( e )
-                    {
-                        console.error( e );
-                        throw e;
-                    }
-                }]);
+                    response.end();
+                });
             }
         }
 
@@ -103,7 +111,7 @@ export default class Endpoint
             Object.defineProperty( request, 'cookies', { get: () => cookies ?? ( cookies = CookieParser.parse( request.headers.cookie ?? '' )) });
 
             response.setHeader( 'Access-Control-Allow-Origin', request.headers.referer?.match( /^https?:\/\/[^/]+/ )?.[0] || '*' );
-            response.setHeader( 'Access-Control-Allow-Methods', '*' );
+            response.setHeader( 'Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS' );
             //response.setHeader( 'Access-Control-Allow-Headers', '*' );
             response.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With' );
             request.headers.referer?.match( /^https?:\/\/[^/]+/ )?.[0] && response.setHeader( 'Access-Control-Allow-Credentials', 'true' );
@@ -114,10 +122,19 @@ export default class Endpoint
             }
             else
             {
-                this.handleMiddlewares( request as EndpointRequest, response as EndpointResponse, options.middlewares );
+                try
+                {
+                    await this.handleRequest( request as EndpointRequest, response as EndpointResponse, options.middlewares );
+                }
+                catch( e: any )
+                {
+                    response.statusCode = e.code || 500;
+                    response.statusMessage = e.message || 'Internal Server Error';
+                    response.end( e instanceof ServerError && e.data ? JSON.stringify( e.data, null, '  ' ) : undefined );
+                }
             }
         });
 
-        this.server.listen( options.port );
+        this.server.listen( typeof options.port === 'string' ? parseInt( options.port ) : options.port );
     }
 }
