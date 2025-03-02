@@ -69,8 +69,10 @@ export default class Router
                     req.params = match.groups || {};
                 }
 
-                await route.handler( req, res );
+                return await route.handler( req, res );
             }
         }
+
+        throw new NotFoundError();
     }
 }
