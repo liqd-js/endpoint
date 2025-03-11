@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import Meta from '../meta';
 import { EndpointRequest, EndpointResponse } from '../router';
 import { RouteArgResolver, RouteArgType } from '../types/private';
+import { IPParser } from '../helpers/parsers';
 
 const HttpBodyParser = require('@liqd-js/http-body-parser');
 //import typia from 'typia';
@@ -12,6 +13,7 @@ const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
     RESPONSE    : ( arg, request, response ) => response,
     HEADERS     : ( arg, request ) => request.headers,
     HEADER      : ( arg, request ) => request.headers[arg.name.toLowerCase()],
+    IP          : ( arg, request ) => IPParser.parse( request ),
     URL         : ( arg, request ) => request.headers.host! + request.url!,
     DOMAIN      : ( arg, request ) => request.headers.host?.replace( /:\d+$/, '' ),
     PATH        : ( arg, request ) => request.path,
@@ -55,6 +57,7 @@ export const Request    = argumentDecorator('REQUEST');
 export const Response   = argumentDecorator('RESPONSE');
 export const Header     = namedArgumentDecorator('HEADER');
 export const Headers    = argumentDecorator('HEADERS');
+export const IP         = argumentDecorator('IP');
 export const Url        = argumentDecorator('URL');
 export const Domain     = argumentDecorator('DOMAIN');
 export const Path       = argumentDecorator('PATH');
@@ -63,8 +66,6 @@ export const Params     = argumentDecorator('PARAMS');
 export const Body       = argumentDecorator('BODY');
 export const RawBody    = argumentDecorator('RAW_BODY');
 //export const Query      = namedArgumentDecorator('QUERY');
-
-
 
 export function Query<T>( name: string )
 {

@@ -1,3 +1,5 @@
+import { EndpointRequest } from '../router';
+
 const sep = '&', eq = '=', del = ';';
 const intRE = /^[0-9]+$/;
 
@@ -85,7 +87,7 @@ const Query = new Proxy( Object,
 
 export class QueryParser
 {
-    static parse<T>( querystring: string ): T
+    public static parse<T>( querystring: string ): T
     {
         let data = new Query(), value, pair, last_pair = 0;
 
@@ -122,7 +124,7 @@ export class QueryParser
 
 export class CookieParser
 {
-    static parse<T>( cookiestring: string ): Record<string, string>
+    public static parse<T>( cookiestring: string ): Record<string, string>
     {
         let cookies: Record<string, string> = {}, key, value, pair, last_pair = 0;
 
@@ -149,5 +151,66 @@ export class CookieParser
         }
 
         return cookies;
+    }
+}
+
+export class IPParser
+{
+    public static parse( ip: string | EndpointRequest ): string
+    {
+        return this.normalizeIP( typeof ip === 'string' ? ip : this.getRequestIP( ip ));
+    }
+
+    public static getRequestIP( request: EndpointRequest ): string
+    {
+        return ( request.headers['x-forwarded-for'] || request.connection?.remoteAddress || request.socket.remoteAddress /* || request.connection?.socket?.remoteAddress */ || '' ).toString();
+    }
+
+    public static validateIP( ip: string )
+    {
+        return ip.includes(':') ? this.validateIPv6( ip ) : this.validateIPv4( ip );
+    }
+
+    public static validateIPv4( ip: string )
+    {
+        return ip.split('.').length === 4 && ip.split('.').every( seg => parseInt( seg ) >= 0 && parseInt( seg ) <= 255 );
+    }
+
+    public static validateIPv6( ip: string )
+    {
+        return ip.split(':').length === 8 && ip.split(':').every( seg => seg.length === 4 && parseInt( seg, 16 ) >= 0 && parseInt( seg, 16 ) <= 65535 );
+    }
+
+    public static normalizeIP( ip: string ): string
+    {
+        ip = ip.toLowerCase().split(',').shift()!.trim().replace(/^::ffff:([0-9.]+)$/, '$1');
+
+        if( ip.includes(':') )
+        {
+            const zoneIndex = ip.indexOf('%'); // Remove any zone identifier (e.g., "%eth0")
+            
+            if( zoneIndex !== -1 )
+            {
+                ip = ip.substring(0, zoneIndex);
+            }
+
+            if( ip.includes('::') ) // If shorthand is used, expand it to normal notation
+            {
+                const parts = ip.split('::');
+                const left = parts[0] ? parts[0].split(':') : [];
+                const right = parts[1] ? parts[1].split(':') : [];
+                const middle = new Array( 8 - ( left.length + right.length )).fill('0000');
+
+                return left.concat( middle, right ).map( seg => seg.padStart(4, '0')).join(':');
+            }
+            else
+            {
+                return ip.split(':').map( seg => seg.padStart(4, '0')).join(':');
+            }
+        }
+
+        if( !this.validateIP( ip )){ throw new Error( 'Invalid IPv4 address' )}
+
+        return ip;
     }
 }
