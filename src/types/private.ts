@@ -7,7 +7,7 @@ export type RouteMetadata =
     method  : 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
     path    : string
     fn      : string
-    args    : { index: number, type: RouteArgType, name: string, resolver: RouteArgResolver }[]
+    args    : { index: number, type: RouteArgType, name: string, resolver: RouteArgResolver, validator?: ( raw: any ) => any }[]
 }
 
 export type RouteArgResolver = ( arg: RouteMetadata['args'][0], request: EndpointRequest, response: EndpointResponse ) => any;

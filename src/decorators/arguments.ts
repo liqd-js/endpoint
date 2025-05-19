@@ -3,6 +3,7 @@ import Meta from '../meta';
 import { EndpointRequest, EndpointResponse } from '../router';
 import { RouteArgResolver, RouteArgType } from '../types/private';
 import { IPParser } from '../helpers/parsers';
+import typia from 'typia';
 
 const HttpBodyParser = require('@liqd-js/http-body-parser');
 //import typia from 'typia';
@@ -44,9 +45,9 @@ const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
     }
 }
 
-function decorateArgument( type: RouteArgType, name: string | undefined, target: Object, propertyKey: string | symbol, parameterIndex: number )
+function decorateArgument( type: RouteArgType, name: string | undefined, target: Object, propertyKey: string | symbol, parameterIndex: number, validator: ReturnType<typeof typia.misc.assertPrune<any>> | undefined = undefined )
 {
-    Meta.pushProperty( 'routeArguments', target, propertyKey, { index: parameterIndex, type, name, resolver: RESOLVERS[type]});
+    Meta.pushProperty( 'routeArguments', target, propertyKey, { index: parameterIndex, type, name, resolver: RESOLVERS[type], validator });
     Meta.getProperty<{index: number}[]>( 'routeArguments', target, propertyKey ).sort(( a, b ) => a.index - b.index );
 }
 
@@ -67,7 +68,7 @@ export const Body       = argumentDecorator('BODY');
 export const RawBody    = argumentDecorator('RAW_BODY');
 //export const Query      = namedArgumentDecorator('QUERY');
 
-export function Query<T>( name: string )
+export function Query<T>( name?: string, validator?: ReturnType<typeof typia.misc.assertPrune<T>> )
 {
     //const validator = typia.createValidate<{ foo: string }>();
 
@@ -75,6 +76,6 @@ export function Query<T>( name: string )
 
     return ( target: Object, propertyKey: string | symbol, parameterIndex: number ) =>
     {
-        decorateArgument( 'QUERY', name, target, propertyKey, parameterIndex );
+        decorateArgument( 'QUERY', name, target, propertyKey, parameterIndex, validator );
     }
 };

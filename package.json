@@ -13,7 +13,8 @@
     "test": "mocha --require ts-node/register test/**/*.ts",
     "coverage": "nyc npm run test",
     "build": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json",
-    "version": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public"
+    "version": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public",
+    "prepare": "ts-patch install"
   },
   "repository": {
     "type": "git",
@@ -27,11 +28,13 @@
   ],
   "dependencies": {
     "@liqd-js/http-body-parser": "^1.0.2",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
+    "typia": "^9.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.15.18",
     "ts-patch": "^3.3.0",
-    "typescript": "^5.8.2"
+    "typescript": "~5.8.3"
   }
 }

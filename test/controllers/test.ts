@@ -1,3 +1,4 @@
+//import typia from 'typia';
 import { Body, Get, Header, Param, Path, Post, Query, Headers, Url, Domain, Params, Request, Response, HTML, Cors } from '../../src/endpoint';
 import { EndpointRequest, EndpointResponse } from '../../src/router';
 
@@ -61,15 +62,15 @@ export default class TestController
         @Path           path    : string,
         @Params         params  : any,
         @Param('id')    param   : string,
-        @Query('')      query   : TypedQuery,
-        @Query('foo')   foo     : TypedQuery,
+        //@Query()        query   : TypedQuery,
+        //@Query('foo', typia.misc.createAssertPrune<{ raw: number }>())   foo     : TypedQuery | { hovno: string },
         @Query('bar')   bar     : string,
         @Body           body    : string
     )
     {
-        foo.foo = 'barko';
+        //foo.foo = 'barko';
 
-        console.log( 'tu sme', { url, domain, agent, headers, path, params, param, query, foo, bar, body });
+        console.log( 'tu sme', { url, domain, agent, headers, path, params, param, /*query, foo,*/ bar, body });
 
         return `Hello world z Getu ${Date.now()}`;
     }

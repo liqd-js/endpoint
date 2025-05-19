@@ -70,7 +70,28 @@ export default class Endpoint
                 this.router.listen( method, path, async( request, response ) =>
                 {
                     const controller = new Controller();
-                    const result = await controller[fn]( ...( await Promise.all(( args ?? [] ).map( a => a.resolver( a, request, response )))));
+                    const result = await controller[fn]( ...( await Promise.all(( args ?? [] ).map( a => 
+                    {
+                        const raw = a.resolver( a, request, response );
+
+                        if(  a.validator )
+                        {
+                            // TODO castovanie stringov na cisla, booleany a pod ak je to potrebne pre Query a pre body v pripade ze bol poslany x-www-form-urlencoded
+
+                            try
+                            {
+                                const validate = a.validator({ raw });
+
+                                console.log( '##### VALIDATE #####', validate );
+                            }
+                            catch( e: any )
+                            {
+                                console.log( e );
+                            }
+                        }
+
+                        return raw;
+                    }))));
 
                     if( !result )
                     {
