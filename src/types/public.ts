@@ -1,6 +1,8 @@
 import { InternalServerError, ServerError } from '../errors';
 import { EndpointRequest, EndpointResponse } from '../router';
 
+type WebSocketClient = {}
+
 export { EndpointRequest, EndpointResponse };
 
 export class Controller{};

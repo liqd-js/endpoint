@@ -9,9 +9,9 @@ const PATH_DOT_RE = /\./g;
 const PATH_PARAM_WH_DEF_RE = /:([a-zA-Z_]+)\((([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(\))+\))+\))+\))+\))+\))+\))+\))+)\)/g; // ([^(]|\\((?R)\\))+
 const PATH_PARAM_WO_DEF_RE = /:([a-zA-Z_]+)/g;
 
-export type EndpointRequest = IncomingMessage & { url: string, path: string, params: Object, query: any, body: Object, cookies: Record<string, string> };
+export type EndpointRequest = IncomingMessage & { domain: string, url: string, path: string, params: Object, query: any, body: Object, cookies: Record<string, string> };
 export type EndpointResponse = ServerResponse<IncomingMessage> & { req: EndpointRequest };
-export type RouterMethod = 'HEAD' | 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+export type RouterMethod = 'HEAD' | 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'CONNECT' | 'TRACE' | 'WS';
 export type RouterPath = string | RegExp;
 export type RouterNext = ( route?: 'route' | 'error' ) => void;
 export type RouterHandler = ( req: EndpointRequest, res: EndpointResponse ) => Promise<void> | void;
@@ -52,27 +52,36 @@ export default class Router
         this.routes.push({ method, path: isExactPath( path ) ? path : pathToRegExp( path ), handler });
     }
 
-    public async dispatch( req: EndpointRequest, res: EndpointResponse )
+    public route( method: RouterMethod, path: string )
     {
-        for( let route of this.routes )
+        return this.routes.find( route => 
+            route.method === method && 
+            ( typeof route.path === 'string' ? route.path === path : route.path instanceof RegExp && route.path.test( path ))
+        );
+    }
+
+    private dispatch( method: RouterMethod, req: EndpointRequest ): RouterHandler
+    {
+        const route = this.route( method, req.path );
+
+        if( !route ){ throw new NotFoundError() }
+        
+
+        if( route.path instanceof RegExp )
         {
-            if( route.method === req.method )
-            {
-                if( typeof route.path === 'string' && route.path !== req.path ){ continue }
-                
-                if( route.path instanceof RegExp )
-                {
-                    let match = route.path.exec( req.path );
-
-                    if( !match ){ continue }
-                    
-                    req.params = match.groups || {};
-                }
-
-                return await route.handler( req, res );
-            }
+            req.params = route.path.exec( req.path )?.groups ?? {};
         }
 
-        throw new NotFoundError();
+        return route.handler;
+    }
+
+    public async dispatchHTTP( req: EndpointRequest, res: EndpointResponse )
+    {
+        return await this.dispatch( req.method as RouterMethod, req )( req, res );
+    }
+
+    public async dispatchWebsocket( req: EndpointRequest, res: EndpointResponse )
+    {
+        return await this.dispatch( 'WS', req )( req, res );
     }
 }

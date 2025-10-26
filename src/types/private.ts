@@ -4,7 +4,7 @@ export type RouteArgType = 'REQUEST' | 'RESPONSE' | 'HEADERS' | 'HEADER' | 'IP' 
 
 export type RouteMetadata =
 {
-    method  : 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    method  : 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'WS'
     path    : string
     fn      : string
     args    : { index: number, type: RouteArgType, name: string, resolver: RouteArgResolver }[]

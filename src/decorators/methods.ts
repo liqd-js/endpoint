@@ -57,3 +57,4 @@ export const Post   = methodDecorator('POST');
 export const Put    = methodDecorator('PUT');
 export const Patch  = methodDecorator('PATCH');
 export const Delete = methodDecorator('DELETE');
+export const Ws     = methodDecorator('WS'); // return false to prevent WebSocket upgrade

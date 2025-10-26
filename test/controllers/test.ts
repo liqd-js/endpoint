@@ -1,4 +1,4 @@
-import { Body, Get, Header, Param, Path, Post, Query, Headers, Url, Domain, Params, Request, Response, HTML, Cors } from '../../src/endpoint';
+import { Body, Get, Header, Param, Path, Post, Query, Headers, Url, Domain, Params, Request, Response, HTML, Cors, Ws } from '../../src/endpoint';
 import { EndpointRequest, EndpointResponse } from '../../src/router';
 
 type TypedQuery = { foo: string };
@@ -22,6 +22,11 @@ export default class TestController
 
         return `Hello world z Getu ${path} ${Date.now()}`;
     }*/
+
+    @Ws( '/test' ) test()
+    {
+        return 'test';
+    }
 
     @Get( '/product' )
     @Cors( true )
