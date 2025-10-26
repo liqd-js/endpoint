@@ -1,6 +1,6 @@
 import { EndpointRequest, EndpointResponse } from '../router';
 
-export type RouteArgType = 'REQUEST' | 'RESPONSE' | 'HEADERS' | 'HEADER' | 'IP' | 'URL' | 'DOMAIN' | 'PATH' | 'PARAMS' | 'PARAM' | 'QUERY' | 'BODY' | 'RAW_BODY';
+export type RouteArgType = 'REQUEST' | 'RESPONSE' | 'HEADERS' | 'HEADER' | 'IP' | 'URL' | 'HOSTNAME' | 'PATH' | 'PARAMS' | 'PARAM' | 'QUERY' | 'BODY' | 'RAW_BODY';
 
 export type RouteMetadata =
 {

@@ -15,7 +15,7 @@ const RESOLVERS: Record<RouteArgType, RouteArgResolver> =
     HEADER      : ( arg, request ) => request.headers[arg.name.toLowerCase()],
     IP          : ( arg, request ) => IPParser.parse( request ),
     URL         : ( arg, request ) => request.headers.host! + request.url!,
-    DOMAIN      : ( arg, request ) => request.headers.host?.replace( /:\d+$/, '' ),
+    HOSTNAME    : ( arg, request ) => request.headers.host?.replace( /:\d+$/, '' ),
     PATH        : ( arg, request ) => request.path,
     PARAMS      : ( arg, request ) => request.params,
     //@ts-ignore
@@ -59,7 +59,7 @@ export const Header     = namedArgumentDecorator('HEADER');
 export const Headers    = argumentDecorator('HEADERS');
 export const IP         = argumentDecorator('IP');
 export const Url        = argumentDecorator('URL');
-export const Domain     = argumentDecorator('DOMAIN');
+export const Hostname   = argumentDecorator('HOSTNAME');
 export const Path       = argumentDecorator('PATH');
 export const Param      = namedArgumentDecorator('PARAM');
 export const Params     = argumentDecorator('PARAMS');

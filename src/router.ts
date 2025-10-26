@@ -9,7 +9,7 @@ const PATH_DOT_RE = /\./g;
 const PATH_PARAM_WH_DEF_RE = /:([a-zA-Z_]+)\((([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(([^(]|\(\))+\))+\))+\))+\))+\))+\))+\))+)\)/g; // ([^(]|\\((?R)\\))+
 const PATH_PARAM_WO_DEF_RE = /:([a-zA-Z_]+)/g;
 
-export type EndpointRequest = IncomingMessage & { domain: string, url: string, path: string, params: Object, query: any, body: Object, cookies: Record<string, string> };
+export type EndpointRequest = IncomingMessage & { hostname: string, url: string, path: string, params: Object, query: any, body: Object, cookies: Record<string, string> };
 export type EndpointResponse = ServerResponse<IncomingMessage> & { req: EndpointRequest };
 export type RouterMethod = 'HEAD' | 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'CONNECT' | 'TRACE' | 'WS';
 export type RouterPath = string | RegExp;

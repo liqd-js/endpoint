@@ -93,7 +93,7 @@ export default class Endpoint
         {
             let query: any, cookies: Record<string, string>;
             
-            Object.assign( request, { domain: request.headers.host?.replace( /:\d+$/, '' ) || '' });
+            Object.assign( request, { hostname: request.headers.host?.replace( /:\d+$/, '' ) || '' });
             Object.assign( request, { url: request.url || '' });
             Object.assign( request, { path: request.url?.split('?')[0] });
             Object.assign( request, { params: {}});
