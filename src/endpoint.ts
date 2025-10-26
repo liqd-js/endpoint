@@ -8,7 +8,7 @@ import { HTML } from './helpers/todo';
 import { Controller, EndpointCreateOptions, Middleware } from './types/public';
 import { ServerError } from './errors';
 
-const WebSocket = require('@liqd-js/websocket');
+//const WebSocket = require('@liqd-js/websocket');
 
 export * from './helpers/todo';
 export * from './decorators';
@@ -126,7 +126,7 @@ export default class Endpoint
         });
     }
 
-    private createWSServer( options: EndpointCreateOptions ): any // TODO WebSocket.Server
+    /*private createWSServer( options: EndpointCreateOptions ): any // TODO WebSocket.Server
     {
         if( !this.wsServer )
         {
@@ -140,19 +140,19 @@ export default class Endpoint
                     {
 
 
-                        /*
+                        / *
 
                         if( true )// !this.#options?.ws?.client?.accept || await this.#options.ws.client.accept( request, socket ))
                         {
                             return this.#ws_router.handles( request );
                         }
 
-                        return false;*/
+                        return false;* /
                     }
                 }
             });
         }
-    }
+    }*/
 
     private listenHTTP( controller: Controller, route: RouteMetadata )
     {
