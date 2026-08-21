@@ -1,4 +1,4 @@
-import { createServer, Server } from 'http';
+import { createServer, Server, STATUS_CODES } from 'http';
 import Meta from './meta';
 
 import { RouteMetadata } from './types/private';
@@ -118,8 +118,13 @@ export default class Endpoint
                 }
                 catch( e: any )
                 {
-                    response.statusCode = e.code || 500;
-                    response.statusMessage = e.message || 'Internal Server Error';
+                    // HTTP reason phrases must never contain an arbitrary exception message:
+                    // Node rejects newlines and other invalid characters, which used to turn a
+                    // handled controller error into an uncaught process-level exception.
+                    const statusCode = Number.isInteger( e?.code ) && e.code >= 400 && e.code <= 599 ? e.code : 500;
+
+                    response.statusCode = statusCode;
+                    response.statusMessage = STATUS_CODES[statusCode] ?? 'Internal Server Error';
                     response.end( e instanceof ServerError && e.data ? JSON.stringify( e.data, null, '  ' ) : undefined );
                 }
             }

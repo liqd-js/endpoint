@@ -10,7 +10,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "test": "mocha --require ts-node/register test/**/*.ts",
+    "test": "mocha --require ts-node/register test/**/*.test.ts",
     "coverage": "nyc npm run test",
     "build": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json",
     "version": "npm i && rm -rf ./dist/* && tsc --project tsconfig.build.json && npm publish --access public"
@@ -30,7 +30,10 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.10",
     "@types/node": "^24.9.1",
+    "mocha": "^11.8.0",
+    "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "typescript": "^5.9.3"
   }
